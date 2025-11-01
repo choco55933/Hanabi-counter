@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hanabi カードカウンター</title>
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background: #f9fafb;
+    color: #333;
+    padding: 1rem;
+    max-width: 700px;
+    margin: auto;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .card {
+    border-radius: 12px;
+    padding: 0.5rem;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    color: #fff;
+  }
+
+  .red   { background: #dc2626; }
+  .blue  { background: #2563eb; }
+  .green { background: #16a34a; }
+  .yellow{ background: #eab308; color:#000; }
+  .white { background: #f3f4f6; color:#000; }
+
+  .color-name {
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+  }
+
+  .number {
+    font-size: 1.2rem;
+  }
+
+  .count {
+    font-size: 1.6rem;
+    margin: 0.25rem 0;
+  }
+
+  .count.zero {
+    color: #ff0000;
+    font-weight: bold;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  button {
+    border: none;
+    background: rgba(255,255,255,0.8);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: rgba(255,255,255,1);
+  }
+
+  #reset {
+    display: block;
+    margin: 1.5rem auto;
+    background: #2563eb;
+    color: white;
+    padding: 0.6rem 1.4rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    border: none;
+  }
+
+  #reset:hover {
+    background: #1e40af;
+  }
+
+  @media (max-width: 500px) {
+    .number {
+      font-size: 1rem;
+    }
+    .count {
+      font-size: 1.3rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Hanabi カードカウンター</h1>
+<div class="board" id="board"></div>
+<button id="reset">リセット</button>
+
+<script>
+const colors = [
+  {name: "赤", class: "red"},
+  {name: "青", class: "blue"},
+  {name: "緑", class: "green"},
+  {name: "黄", class: "yellow"},
+  {name: "白", class: "white"}
+];
+
+const initialCounts = {1: 3, 2: 2, 3: 2, 4: 2, 5: 1};
+
+const board = document.getElementById("board");
+let currentCounts = {};
+
+function createCard(colorObj, number, count) {
+  const color = colorObj.name;
+  const colorClass = colorObj.class;
+  const id = `${color}-${number}`;
+
+  const div = document.createElement("div");
+  div.className = `card ${colorClass}`;
+  div.innerHTML = `
+    <div class="color-name">${color}</div>
+    <div class="number">${number}</div>
+    <div class="count" id="${id}">${count}</div>
+    <div class="controls">
+      <button onclick="changeCount('${color}', ${number}, -1)">−</button>
+      <button onclick="changeCount('${color}', ${number}, 1)">＋</button>
+    </div>
+  `;
+  board.appendChild(div);
+  currentCounts[id] = count;
+}
+
+function renderBoard() {
+  board.innerHTML = "";
+  colors.forEach(colorObj => {
+    for (let n = 1; n <= 5; n++) {
+      createCard(colorObj, n, initialCounts[n]);
+    }
+  });
+}
+renderBoard();
+
+function changeCount(color, number, delta) {
+  const id = `${color}-${number}`;
+  const el = document.getElementById(id);
+  let current = currentCounts[id];
+  const max = initialCounts[number];
+
+  current = Math.min(max, Math.max(0, current + delta));
+  currentCounts[id] = current;
+
+  el.textContent = current;
+  el.classList.toggle("zero", current === 0);
+}
+
+document.getElementById("reset").addEventListener("click", () => {
+  renderBoard();
+});
+</script>
+
+</body>
+</html>
